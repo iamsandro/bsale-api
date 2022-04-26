@@ -24,14 +24,16 @@ development:
   password: <%= ENV['RDS_PASSWORD'] %>
   host: <%= ENV['RDS_HOSTNAME'] %>
   port: 3306
-  pool: 5
+  # pool: ENV.fetch("RAILS_MAX_THREADS") { 5 }
+  pool: 40
+  timeout: 5000
 
 # Warning: The database defined as "test" will be erased and
 # re-generated from your development database when you run "rake".
 # Do not set this db to the same as development or production.
 test:
   <<: *default
-  database: bsale_api_test
+  database: <%= ENV['RDS_DB_NAME'] %>
 
 # As with config/credentials.yml, you never want to store sensitive information,
 # like your database password, in your source code. If your source code is
