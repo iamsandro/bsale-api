@@ -3,23 +3,18 @@ class CategoriesController < ApplicationController
                 only: %I[index show]
 
   # GET /category or /category.json
-  def index
-    render json: @categories
-  end
+  def index; end
 
   # GET /category/:category_id
-  def show
-    my_products = @products.select { |product| product["category"].eql? params["id"].to_i }
-    render json: my_products
-  end
+  def show; end
 
   private
-  
+
   def set_category
-    client = Mysql2::Client.new(host: ENV["RDS_HOSTNAME"],
-                                username: ENV["RDS_DB_NAME"],
-                                password: ENV["RDS_PASSWORD"],
-                                database: ENV["RDS_DB_NAME"])
+    client = Mysql2::Client.new(host: ENV.fetch("RDS_HOSTNAME", nil),
+                                username: ENV.fetch("RDS_DB_NAME", nil),
+                                password: ENV.fetch("RDS_PASSWORD", nil),
+                                database: ENV.fetch("RDS_DB_NAME", nil))
     @categories = client.query("SELECT * FROM category").to_a
     @products = client.query("SELECT * FROM product").to_a
   end

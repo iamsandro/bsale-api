@@ -1,37 +1,84 @@
 class ProductsController < ApplicationController
-  before_action :set_product, only: %I[show index sort search]
+  before_action :set_product,
+                only: %I[index show sort search show_products_by_category categories_of_products]
 
-  # GET /category or /category.json
+  # GET /products or /products.json
   def index
-    render json: @products
+    render json: @products, status: :ok
   end
 
-  # GET /category/:sort_by/:order || GET /category/:category_id/:sort_by/:order
+  # GET /products/:id
+  def show
+    product = @products.find { |item| item["id"].eql?(params["id"].to_i) }
+    if product.nil?
+      render json: { error: "product doesn't exist or it was deleted" }, status: :not_found
+    else
+      render json: product, status: :ok
+    end
+  end
+
+  # GET /products/:sort_by/:order || GET /products/:product_id/:sort_by/:order
   def sort
-    products = params["id"].nil? ? @products : @products.select { |x| x["category"] == params["id"].to_i }
-    my_products = products.sort_by { |product| product[params["by_sort"]] }
+    products = @products
+    unless params["id"].nil?
+      products = @products.select { |product| product["category"].eql?(params["id"].to_i) }
+    end
+    pp "holiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiii"
+    ordered_products = products.sort_by { |product| product[params["by_sort"]] }
+    is_asc = params["order"].eql?("asc") || params["order"].eql?("A-Z")
 
-    render json: params["order"] == "asc" ? my_products : my_products.reverse
+    if ordered_products.empty?
+      render json: { error: "Category ID wrong or doesn't has products" }, status: :bad_request
+    else
+      render json: is_asc ? ordered_products : ordered_products.reverse, status: :ok
+    end
   end
 
-  # GET /search/:name_product
+  # GET /categories
+  def categories_of_products
+    render json: @categories
+  end
+
+  # GET /categories/:category_id
+  def show_products_by_category
+    my_products = @products.select do |product|
+      product["category"] == params["category_id"].to_i
+    end 
+    # if my_products.empty?
+    #   render json: {error: "category ID invalid or the category has no element yet"}, status: :not_found
+    # else
+      render json: my_products, status: :ok
+    # end
+  end
+
+  # GET /clasificacion_types
+  def clasification_types
+    types = ["name A-Z", "name Z-A", "price asc", "price desc", "discount asc", "discount desc"]
+    render json: types
+  end
+
+  # GET /search/:name_product(/:by_sort/:order)
   def search
-    product_searched = @products.select { |x| x["name"].include?(params["search"].upcase) }
-    render json: product_searched
+    product_searched = @products.select do |product|
+      product["name"].upcase.include?(params["search"].upcase)
+    end
+    product_searched.sort_by! { |product| product[params["by_sort"]] } if params["by_sort"]
+    product_searched.reverse! if params["order"].eql?("desc")
+
+    render json: product_searched, status: :ok
   end
 
   private
 
   def set_product
-    client = Mysql2::Client.new(host: ENV["RDS_HOSTNAME"],
-                                username: ENV["RDS_DB_NAME"],
-                                password: ENV["RDS_PASSWORD"],
-                                database: ENV["RDS_DB_NAME"])
+    client = Mysql2::Client.new(host: ENV.fetch("RDS_HOSTNAME", nil),
+                                username: ENV.fetch("RDS_DB_NAME", nil),
+                                password: ENV.fetch("RDS_PASSWORD", nil),
+                                database: ENV.fetch("RDS_DB_NAME", nil),
+                                connect_timeout: 5,
+                                wait_tiemeout: 180,
+                                read_timeout: 5)
     @products = client.query("SELECT * FROM product").to_a
-  end
-
-  # Only allow a list of trusted parameters through.
-  def Product_params
-    params.require(:product).permit(:name, :url_image, :price, :discount, :category)
+    @categories = client.query("SELECT * FROM category").to_a
   end
 end
