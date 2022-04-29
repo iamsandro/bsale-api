@@ -1,7 +1,6 @@
 require "rails_helper"
 
 describe "Products", type: :request do
-
   describe "index products" do
     it "respond with http success status code" do
       get "/products"
@@ -69,6 +68,4 @@ describe "Products", type: :request do
       expect(obteined_array[0]["category"]).to eq(7)
     end
   end
-
-
 end

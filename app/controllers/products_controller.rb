@@ -23,7 +23,6 @@ class ProductsController < ApplicationController
     unless params["id"].nil?
       products = @products.select { |product| product["category"].eql?(params["id"].to_i) }
     end
-    pp "holiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiii"
     ordered_products = products.sort_by { |product| product[params["by_sort"]] }
     is_asc = params["order"].eql?("asc") || params["order"].eql?("A-Z")
 
@@ -43,12 +42,8 @@ class ProductsController < ApplicationController
   def show_products_by_category
     my_products = @products.select do |product|
       product["category"] == params["category_id"].to_i
-    end 
-    # if my_products.empty?
-    #   render json: {error: "category ID invalid or the category has no element yet"}, status: :not_found
-    # else
-      render json: my_products, status: :ok
-    # end
+    end
+    render json: my_products, status: :ok
   end
 
   # GET /clasificacion_types
