@@ -376,3 +376,19 @@ ActiveRecord::ConnectionAdapters::Mysql2Adapter.prepend Mysql2AdapterPatch
 ```
 
 Por mi parte seguiré investigando, para poder implementar mi propuesta.
+
+### Insomia
+
+Use insomia para poder verificar a la api, aquí dejo el file:
+`https://drive.google.com/file/d/1xyVWT2YxAoqb5YtcLd4x6BUjcbiJ0ZhO/view?usp=sharing`
+
+## Deployment
+
+La api fue deployada en Heroku:
+`https://bsale-api-test.herokuapp.com`
+
+Si se desea usar, se tiene que añadir las rutas, por ejemplo:
+
+`https://bsale-api-test.herokuapp.com/categories`
+
+`https://bsale-api-test.herokuapp.com/products`
