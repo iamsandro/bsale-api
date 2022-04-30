@@ -35,10 +35,13 @@ gem "rack-cors"
 
 gem "rspec-rails"
 
+gem "mysql2", "~> 0.5"
+
+gem "dotenv-rails"
+
 group :development, :test do
   # See https://guides.rubyonrails.org/debugging_rails_applications.html#debugging-with-the-debug-gem
   gem "debug", platforms: %i[mri mingw x64_mingw]
-  gem "dotenv-rails"
   gem "rubocop", require: false
   gem "rubocop-rails", require: false
 end
@@ -48,7 +51,6 @@ group :development do
   # gem "spring"
 end
 
-group :production do
-  # Use mysql as the database for Active Record
-  gem "mysql2", "~> 0.5"
-end
+# group :production do
+#   # Use mysql as the database for Active Record
+# end
