@@ -66,13 +66,8 @@ class ProductsController < ApplicationController
   private
 
   def set_product
-    client = Mysql2::Client.new(host: ENV.fetch("RDS_HOSTNAME", nil),
-                                username: ENV.fetch("RDS_DB_NAME", nil),
-                                password: ENV.fetch("RDS_PASSWORD", nil),
-                                database: ENV.fetch("RDS_DB_NAME", nil),
-                                connect_timeout: 5,
-                                wait_tiemeout: 180,
-                                read_timeout: 5)
+    credentials = Rails.configuration.database_configuration["default"]
+    client = Mysql2::Client.new(credentials)
     @products = client.query("SELECT * FROM product").to_a
     @categories = client.query("SELECT * FROM category").to_a
   end
