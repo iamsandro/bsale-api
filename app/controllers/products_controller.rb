@@ -1,15 +1,13 @@
 class ProductsController < ApplicationController
-  before_action :set_product,
-                only: %I[index show sort search show_products_by_category categories_of_products]
 
   # GET /products or /products.json
   def index
-    render json: @products, status: :ok
+    render json: Product.all_products, status: :ok
   end
 
   # GET /products/:id
   def show
-    product = @products.find { |item| item["id"].eql?(params["id"].to_i) }
+    product = Product.show_product(params["id"])
     if product.nil?
       render json: { error: "product doesn't exist or it was deleted" }, status: :not_found
     else
@@ -19,31 +17,21 @@ class ProductsController < ApplicationController
 
   # GET /products/:sort_by/:order || GET /products/:product_id/:sort_by/:order
   def sort
-    products = @products
-    unless params["id"].nil?
-      products = @products.select { |product| product["category"].eql?(params["id"].to_i) }
-    end
-    ordered_products = products.sort_by { |product| product[params["by_sort"]] }
-    is_asc = params["order"].eql?("asc") || params["order"].eql?("A-Z")
+    by_sort = params["by_sort"]
+    order = params["order"].eql?("A-Z") || params["order"].eql?("asc") ? "ASC" : "DESC"
+    category_id = params["category_id"]
 
-    if ordered_products.empty?
+    products_sorted = if category_id.nil?
+                        Product.sort_everything(by_sort, order)
+                      else
+                        Product.sort_by_category(category_id, by_sort, order)
+                      end
+
+    if products_sorted.empty?
       render json: { error: "Category ID wrong or doesn't has products" }, status: :bad_request
     else
-      render json: is_asc ? ordered_products : ordered_products.reverse, status: :ok
+      render json: products_sorted, status: :ok
     end
-  end
-
-  # GET /categories
-  def categories_of_products
-    render json: @categories
-  end
-
-  # GET /categories/:category_id
-  def show_products_by_category
-    my_products = @products.select do |product|
-      product["category"] == params["category_id"].to_i
-    end
-    render json: my_products, status: :ok
   end
 
   # GET /clasificacion_types
@@ -54,21 +42,19 @@ class ProductsController < ApplicationController
 
   # GET /search/:name_product(/:by_sort/:order)
   def search
-    product_searched = @products.select do |product|
-      product["name"].upcase.include?(params["search"].upcase)
-    end
-    product_searched.sort_by! { |product| product[params["by_sort"]] } if params["by_sort"]
-    product_searched.reverse! if params["order"].eql?("desc")
+    product_name = params["search"]
+    by_sort = params["by_sort"]
+    order = params["order"]&.eql?("A-Z") || params["order"].eql?("asc") ? "ASC" : "DESC"
+    products_found = Product.search(product_name) if by_sort.nil?
+    products_found = Product.search_with_sort(product_name, by_sort, order) unless by_sort.nil?
 
-    render json: product_searched, status: :ok
+    render json: products_found, status: :ok
   end
 
   private
 
-  def set_product
-    credentials = Rails.configuration.database_configuration["default"]
-    client = Mysql2::Client.new(credentials)
-    @products = client.query("SELECT * FROM product").to_a
-    @categories = client.query("SELECT * FROM category").to_a
+  def product_params
+    # params.require(:product).permit "category_id"
+    params.require(:category_id)
   end
 end
