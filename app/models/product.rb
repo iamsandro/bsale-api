@@ -9,9 +9,11 @@ class Product
     @client.query("SELECT * FROM product").to_a
   end
 
-  def self.show_product(product_id)
+  def self.show_product(product_ids)
     send_credentials
-    @client.query("SELECT * FROM product WHERE id = #{product_id})").to_a
+    product_ids.map! { |id| "id = #{id}" }
+    temp = product_ids.join(" OR ")
+    @client.query("SELECT * FROM product WHERE #{temp}").to_a
   end
 
   def self.sort_everything(sort_by, order)
@@ -26,7 +28,7 @@ class Product
 
   def self.search(product_name)
     send_credentials
-    @client.query("SELECT * FROM product WHERE product.name LIKE '%#{product_name}%'")
+    @client.query("SELECT * FROM product WHERE product.name LIKE '%#{product_name}%'").to_a
   end
 
   def self.search_with_sort(product_name, sort_by, order)

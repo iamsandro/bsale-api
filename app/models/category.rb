@@ -1,5 +1,4 @@
 class Category
-
   def self.send_credentials
     credentials = Rails.configuration.database_configuration["default"]
     @client = Mysql2::Client.new(credentials)
@@ -14,5 +13,4 @@ class Category
     send_credentials
     @client.query("SELECT * FROM product WHERE category = #{category_id}").to_a
   end
-
 end

@@ -1,8 +1,10 @@
 class ProductsController < ApplicationController
-
+  @number_pages = 10
   # GET /products or /products.json
   def index
-    render json: Product.all_products, status: :ok
+    @products = Product.all_products
+    add_new_price
+    render json: @products, status: :ok
   end
 
   # GET /products/:id
@@ -15,22 +17,31 @@ class ProductsController < ApplicationController
     end
   end
 
+  # GET /array/:array_id
+  def search_products
+    array = params["array_id"].split(",")
+    @products = Product.show_product(array)
+    add_new_price
+    render json: @products, status: :ok
+  end
+
   # GET /products/:sort_by/:order || GET /products/:product_id/:sort_by/:order
   def sort
     by_sort = params["by_sort"]
     order = params["order"].eql?("A-Z") || params["order"].eql?("asc") ? "ASC" : "DESC"
     category_id = params["category_id"]
 
-    products_sorted = if category_id.nil?
+    @products = if category_id.nil?
                         Product.sort_everything(by_sort, order)
                       else
                         Product.sort_by_category(category_id, by_sort, order)
                       end
 
-    if products_sorted.empty?
+    if @products.empty?
       render json: { error: "Category ID wrong or doesn't has products" }, status: :bad_request
     else
-      render json: products_sorted, status: :ok
+      add_new_price
+      render json: @products, status: :ok
     end
   end
 
@@ -44,11 +55,12 @@ class ProductsController < ApplicationController
   def search
     product_name = params["search"]
     by_sort = params["by_sort"]
-    order = params["order"]&.eql?("A-Z") || params["order"].eql?("asc") ? "ASC" : "DESC"
-    products_found = Product.search(product_name) if by_sort.nil?
-    products_found = Product.search_with_sort(product_name, by_sort, order) unless by_sort.nil?
+    order = params["order"].eql?("A-Z") || params["order"].eql?("asc") ? "ASC" : "DESC"
+    @products = Product.search(product_name) if by_sort.nil?
+    @products = Product.search_with_sort(product_name, by_sort, order) unless by_sort.nil?
+    add_new_price
 
-    render json: products_found, status: :ok
+    render json: @products, status: :ok
   end
 
   private
@@ -56,5 +68,13 @@ class ProductsController < ApplicationController
   def product_params
     # params.require(:product).permit "category_id"
     params.require(:category_id)
+  end
+
+  def add_new_price
+    @products.map! do |product|
+      product.update({ "new_price" => product["price"] * (100 - product["discount"]) / 100})
+      product.update({ "saving" => product["price"] - product["new_price"]})
+    end
+    @products = @products.each_slice(10).to_a
   end
 end
