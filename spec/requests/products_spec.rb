@@ -4,7 +4,6 @@ describe "Products", type: :request do
   describe "index products" do
     it "respond with http success status code" do
       get "/products"
-      # json = JSON.parse(response.body)
       expect(response.content_type).to eq("application/json; charset=utf-8")
       expect(response).to have_http_status(:ok)
     end
@@ -12,9 +11,9 @@ describe "Products", type: :request do
 
   describe "show products" do
     it "respond with http not found status code" do
-      get "/products/xxx"
+      get "/get_products/25,26"
       expect(response.content_type).to eq("application/json; charset=utf-8")
-      expect(response).to have_http_status(:not_found)
+      expect(response).to have_http_status(:ok)
     end
   end
 
@@ -56,7 +55,6 @@ describe "Products", type: :request do
       types = ["name A-Z", "name Z-A", "price asc", "price desc", "discount asc", "discount desc"]
       get "/clasification_types"
       obteined_array = JSON.parse(response.body)
-      pp obteined_array
       expect(obteined_array).to eq(types)
     end
   end
@@ -65,7 +63,7 @@ describe "Products", type: :request do
     it "respond with array of objects with same category" do
       get "/categories/7"
       obteined_array = JSON.parse(response.body)
-      expect(obteined_array[0]["category"]).to eq(7)
+      expect(obteined_array[0][0]["category"]).to eq(7)
     end
   end
 end

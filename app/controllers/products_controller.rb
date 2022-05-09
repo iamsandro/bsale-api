@@ -7,19 +7,9 @@ class ProductsController < ApplicationController
     render json: @products, status: :ok
   end
 
-  # GET /products/:id
-  def show
-    product = Product.show_product(params["id"])
-    if product.nil?
-      render json: { error: "product doesn't exist or it was deleted" }, status: :not_found
-    else
-      render json: product, status: :ok
-    end
-  end
-
-  # GET /array/:array_id
-  def search_products
-    array = params["array_id"].split(",")
+  # GET /get_products/:products_ids
+  def getting_products
+    array = params["products_ids"].split(",")
     @products = Product.show_product(array)
     add_new_price
     render json: @products, status: :ok
@@ -70,6 +60,8 @@ class ProductsController < ApplicationController
     params.require(:category_id)
   end
 
+  # Este método añade al array de hashes, que devuelve la consulta, el precio aplicado su descuento, y la cantidad que se descontó
+  # Añadí este método para evitar tener que hacer los calculos en el frontent, y simplemente llamarlos.
   def add_new_price
     @products.map! do |product|
       product.update({ "new_price" => product["price"] * (100 - product["discount"]) / 100})

@@ -13,6 +13,8 @@ class CategoriesController < ApplicationController
 
   private
 
+  # Este método añade al array de hashes, que devuelve la consulta, el precio aplicado su descuento, y la cantidad que se descontó
+  # Añadí este método para evitar tener que hacer los calculos en el frontent, y simplemente llamarlos.
   def add_new_price
     @products.map! do |product|
       product.update({ "new_price" => product["price"] * (100 - product["discount"]) / 100 })
