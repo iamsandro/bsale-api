@@ -18,7 +18,7 @@ class CategoriesController < ApplicationController
   def add_new_price
     @products.map! do |product|
       product.update({ "new_price" => product["price"] * (100 - product["discount"]) / 100 })
-      product.update({ "saving" => product["price"] - product["new_price"]})
+      product.update({ "saving" => product["price"] - product["new_price"] })
     end
     @products = @products.each_slice(10).to_a
   end

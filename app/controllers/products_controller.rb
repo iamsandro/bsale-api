@@ -22,10 +22,10 @@ class ProductsController < ApplicationController
     category_id = params["category_id"]
 
     @products = if category_id.nil?
-                        Product.sort_everything(by_sort, order)
-                      else
-                        Product.sort_by_category(category_id, by_sort, order)
-                      end
+                  Product.sort_everything(by_sort, order)
+                else
+                  Product.sort_by_category(category_id, by_sort, order)
+                end
 
     if @products.empty?
       render json: { error: "Category ID wrong or doesn't has products" }, status: :bad_request
@@ -64,8 +64,8 @@ class ProductsController < ApplicationController
   # Añadí este método para evitar tener que hacer los calculos en el frontent, y simplemente llamarlos.
   def add_new_price
     @products.map! do |product|
-      product.update({ "new_price" => product["price"] * (100 - product["discount"]) / 100})
-      product.update({ "saving" => product["price"] - product["new_price"]})
+      product.update({ "new_price" => product["price"] * (100 - product["discount"]) / 100 })
+      product.update({ "saving" => product["price"] - product["new_price"] })
     end
     @products = @products.each_slice(10).to_a
   end

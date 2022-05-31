@@ -11,7 +11,7 @@ class Category
     @client.query("SELECT * FROM category").to_a
   end
 
-  #Esta consulta devuelve todos los producto de una categoría en específico.
+  # Esta consulta devuelve todos los producto de una categoría en específico.
   def self.select_products_by_category(category_id)
     send_credentials
     @client.query("SELECT * FROM product WHERE category = #{category_id}").to_a
